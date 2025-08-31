@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -20,14 +20,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     toast.success('Logged out successfully');
   }, []);
 
   const fetchUserProfile = useCallback(async () => {
     try {
-      const response = await axios.get('/api/auth/profile');
+      const response = await api.get('/api/auth/profile');
       setUser(response.data.user);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Token will be automatically added by the API interceptor
       // Verify token and get user data
       fetchUserProfile();
     } else {
@@ -51,16 +50,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await api.post('/api/auth/login', {
         email,
         password
       });
 
       const { token, user } = response.data;
       
-      // Store token
+      // Store token - it will be automatically used by API interceptor
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(user);
       toast.success('Welcome back!');
@@ -74,13 +72,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       
       const { token, user } = response.data;
       
-      // Store token
+      // Store token - it will be automatically used by API interceptor
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(user);
       toast.success('Account created successfully!');
@@ -94,7 +91,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('/api/auth/profile', profileData);
+      const response = await api.put('/api/auth/profile', profileData);
       setUser(response.data.user);
       toast.success('Profile updated successfully');
       return { success: true };
@@ -107,7 +104,7 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      await axios.put('/api/auth/change-password', {
+      await api.put('/api/auth/change-password', {
         currentPassword,
         newPassword
       });

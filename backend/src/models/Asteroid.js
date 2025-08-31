@@ -69,7 +69,26 @@ const asteroidSchema = new mongoose.Schema({
     density: Number, // in kg/m³
     averageDiameter: Number, // in meters
     averageVelocity: Number, // in km/s
-    kineticEnergy: Number // in joules
+    kineticEnergy: Number, // in joules
+    volume: Number, // in cubic meters
+    orbitalPeriod: Number, // in days
+    lastCalculated: Date
+  },
+  // Metadata about the data source and updates
+  metadata: {
+    lastUpdated: {
+      type: Date,
+      default: Date.now
+    },
+    source: {
+      type: String,
+      default: 'NASA_NeoWs_API'
+    },
+    version: {
+      type: String,
+      default: '1.0'
+    },
+    nasa_id: String // Original NASA ID
   },
   lastUpdated: {
     type: Date,

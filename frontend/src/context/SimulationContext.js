@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 const SimulationContext = createContext();
@@ -24,7 +24,7 @@ export const SimulationProvider = ({ children }) => {
     try {
       setLoading(true);
       const queryString = new URLSearchParams(params).toString();
-      const response = await axios.get(`/api/asteroids?${queryString}`);
+      const response = await api.get(`/api/asteroids?${queryString}`);
       setAsteroids(response.data.asteroids);
       return response.data;
     } catch (error) {
@@ -38,7 +38,7 @@ export const SimulationProvider = ({ children }) => {
 
   const fetchFeaturedAsteroids = async (limit = 10) => {
     try {
-      const response = await axios.get(`/api/asteroids/featured?limit=${limit}`);
+      const response = await api.get(`/api/asteroids/featured?limit=${limit}`);
       return response.data.asteroids;
     } catch (error) {
       console.error('Failed to fetch featured asteroids:', error);
@@ -48,7 +48,7 @@ export const SimulationProvider = ({ children }) => {
 
   const searchAsteroids = async (query, limit = 10) => {
     try {
-      const response = await axios.get(`/api/asteroids/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+      const response = await api.get(`/api/asteroids/search?q=${encodeURIComponent(query)}&limit=${limit}`);
       return response.data.asteroids;
     } catch (error) {
       console.error('Failed to search asteroids:', error);
@@ -58,7 +58,7 @@ export const SimulationProvider = ({ children }) => {
 
   const getAsteroidById = async (id) => {
     try {
-      const response = await axios.get(`/api/asteroids/${id}`);
+      const response = await api.get(`/api/asteroids/${id}`);
       return response.data.asteroid;
     } catch (error) {
       console.error('Failed to fetch asteroid:', error);
@@ -69,7 +69,7 @@ export const SimulationProvider = ({ children }) => {
   const runSimulation = async (simulationData) => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/simulations', simulationData);
+      const response = await api.post('/api/simulations', simulationData);
       const newSimulation = response.data.simulation;
       
       setCurrentSimulation(newSimulation);
@@ -89,7 +89,7 @@ export const SimulationProvider = ({ children }) => {
     try {
       setLoading(true);
       const queryString = new URLSearchParams(params).toString();
-      const response = await axios.get(`/api/simulations/my?${queryString}`);
+      const response = await api.get(`/api/simulations/my?${queryString}`);
       setSimulations(response.data.simulations);
       return response.data;
     } catch (error) {
@@ -105,7 +105,7 @@ export const SimulationProvider = ({ children }) => {
     try {
       setLoading(true);
       const queryString = new URLSearchParams(params).toString();
-      const response = await axios.get(`/api/simulations/public?${queryString}`);
+      const response = await api.get(`/api/simulations/public?${queryString}`);
       setSimulations(response.data.simulations);
       return response.data;
     } catch (error) {
@@ -119,7 +119,7 @@ export const SimulationProvider = ({ children }) => {
 
   const getSimulationById = async (id) => {
     try {
-      const response = await axios.get(`/api/simulations/${id}`);
+      const response = await api.get(`/api/simulations/${id}`);
       return response.data.simulation;
     } catch (error) {
       console.error('Failed to fetch simulation:', error);
@@ -129,7 +129,7 @@ export const SimulationProvider = ({ children }) => {
 
   const voteOnSimulation = async (simulationId, vote) => {
     try {
-      const response = await axios.post(`/api/simulations/${simulationId}/vote`, { vote });
+      const response = await api.post(`/api/simulations/${simulationId}/vote`, { vote });
       
       toast.success('Vote recorded!');
       return response.data;
@@ -142,7 +142,7 @@ export const SimulationProvider = ({ children }) => {
 
   const addComment = async (simulationId, text) => {
     try {
-      const response = await axios.post(`/api/simulations/${simulationId}/comments`, { text });
+      const response = await api.post(`/api/simulations/${simulationId}/comments`, { text });
       toast.success('Comment added!');
       return response.data.comment;
     } catch (error) {
@@ -154,7 +154,7 @@ export const SimulationProvider = ({ children }) => {
 
   const deleteSimulation = async (simulationId) => {
     try {
-      await axios.delete(`/api/simulations/${simulationId}`);
+      await api.delete(`/api/simulations/${simulationId}`);
       setSimulations(prev => prev.filter(sim => sim._id !== simulationId));
       toast.success('Simulation deleted');
       return { success: true };
@@ -167,7 +167,7 @@ export const SimulationProvider = ({ children }) => {
 
   const getSimulationStats = async () => {
     try {
-      const response = await axios.get('/api/simulations/stats/overview');
+      const response = await api.get('/api/simulations/stats/overview');
       return response.data.statistics;
     } catch (error) {
       console.error('Failed to fetch simulation stats:', error);
@@ -177,7 +177,7 @@ export const SimulationProvider = ({ children }) => {
 
   const getAsteroidStats = async () => {
     try {
-      const response = await axios.get('/api/asteroids/stats/overview');
+      const response = await api.get('/api/asteroids/stats/overview');
       return response.data.statistics;
     } catch (error) {
       console.error('Failed to fetch asteroid stats:', error);
@@ -188,7 +188,7 @@ export const SimulationProvider = ({ children }) => {
   const syncAsteroidData = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/asteroids/sync');
+      const response = await api.post('/api/asteroids/sync');
       toast.success('Asteroid data synchronized!');
       return response.data;
     } catch (error) {

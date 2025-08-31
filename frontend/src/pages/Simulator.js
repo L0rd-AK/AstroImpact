@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import L from 'leaflet';
 import { AuthContext } from '../context/AuthContext';
 import { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, SafeEnhancedImpact3D, is3DSupported } from '../components/3D';
+import api from '../utils/api';
 import 'leaflet/dist/leaflet.css';
 
 // Fix missing leaflet marker icons
@@ -62,13 +63,11 @@ const Simulator = () => {
 
   const loadAsteroids = async () => {
     try {
-      const response = await fetch('/api/asteroids');
-      if (response.ok) {
-        const data = await response.json();
-        setAsteroids(data.asteroids || []);
-        if (data.asteroids && data.asteroids.length > 0) {
-          setSelectedAsteroid(data.asteroids[0]);
-        }
+      const response = await api.get('/api/asteroids');
+      const data = response.data;
+      setAsteroids(data.asteroids || []);
+      if (data.asteroids && data.asteroids.length > 0) {
+        setSelectedAsteroid(data.asteroids[0]);
       }
     } catch (error) {
       console.error('Error loading asteroids:', error);
@@ -107,33 +106,19 @@ const Simulator = () => {
         asteroidData: selectedAsteroid
       };
 
-      console.log('Sending simulation data:', simulationData);
+  console.log('Sending simulation data:', simulationData);
 
-      const response = await fetch('/api/simulations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(simulationData)
-      });
+  const response = await api.post('/api/simulations', simulationData);
 
       console.log('Response status:', response.status);
-      
-      if (response.ok) {
-        const results = await response.json();
-        console.log('Simulation results:', results);
-        setSimulationResults(results);
-        setShowResults(true);
-        toast.success('Simulation completed successfully!');
-      } else {
-        const errorData = await response.json();
-        console.error('Simulation failed with error:', errorData);
-        throw new Error(errorData.error || 'Simulation failed');
-      }
+      console.log('Simulation results:', response.data);
+      setSimulationResults(response.data);
+      setShowResults(true);
+      toast.success('Simulation completed successfully!');
     } catch (error) {
-      console.error('Simulation error:', error);
-      toast.error(`Failed to run simulation: ${error.message}`);
+      console.error('Simulation failed with error:', error);
+      const message = error.response?.data?.error || 'Simulation failed';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

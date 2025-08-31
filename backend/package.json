@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest"
+    "test": "jest",
+    "seed": "node seedAsteroids.js",
+    "init-nasa": "node initializeNasaData.js",
+    "sync-nasa": "node -e \"require('./src/utils/nasaApi').syncAsteroidData().then(() => process.exit(0)).catch(e => {console.error(e); process.exit(1);})\""
   },
   "keywords": [
     "nasa",

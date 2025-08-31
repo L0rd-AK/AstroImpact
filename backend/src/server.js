@@ -11,6 +11,10 @@ const asteroidRoutes = require('./routes/asteroids');
 const simulationRoutes = require('./routes/simulations');
 const userRoutes = require('./routes/users');
 
+// Import NASA API service
+const nasaApi = require('./utils/nasaApi');
+const Asteroid = require('./models/Asteroid');
+
 const app = express();
 
 // Trust proxy for rate limiting (fixes X-Forwarded-For warning)
@@ -18,9 +22,15 @@ app.set('trust proxy', 1);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',        // Development frontend
+    'https://astroimpact.vercel.app', // Production frontend
+    process.env.FRONTEND_URL        // Environment-specific URL
+  ].filter(Boolean), // Remove any undefined values
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 // Security middleware
@@ -43,7 +53,34 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/astroimpa
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ Connected to MongoDB'))
+.then(async () => {
+  console.log('✅ Connected to MongoDB');
+  
+  // Initialize asteroid data from NASA API if database is empty
+  try {
+    const asteroidCount = await Asteroid.countDocuments();
+    if (asteroidCount === 0) {
+      console.log('🔄 Database is empty, fetching initial asteroid data from NASA API...');
+      await nasaApi.syncAsteroidData();
+      console.log('✅ Initial asteroid data loaded from NASA API');
+    } else {
+      console.log(`📊 Found ${asteroidCount} asteroids in database`);
+      
+      // Check if data is older than 24 hours and sync if needed
+      const lastUpdated = await Asteroid.findOne({}, {}, { sort: { 'metadata.lastUpdated': -1 } });
+      if (lastUpdated && lastUpdated.metadata?.lastUpdated) {
+        const hoursSinceUpdate = (Date.now() - lastUpdated.metadata.lastUpdated.getTime()) / (1000 * 60 * 60);
+        if (hoursSinceUpdate > 24) {
+          console.log('🔄 Data is older than 24 hours, syncing with NASA API...');
+          await nasaApi.syncAsteroidData();
+        }
+      }
+    }
+  } catch (error) {
+    console.error('⚠️ Error initializing asteroid data:', error.message);
+    console.log('📝 Continuing with existing data or fallback data...');
+  }
+})
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // API routes

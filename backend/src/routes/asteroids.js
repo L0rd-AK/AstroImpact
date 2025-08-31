@@ -44,7 +44,7 @@ router.get('/', optionalAuth, async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortDirection = sortOrder === 'asc' ? 1 : -1;
 
-    let asteroids = await Asteroid.find(query)
+    const asteroids = await Asteroid.find(query)
       .sort({ [sortBy]: sortDirection })
       .skip(skip)
       .limit(parseInt(limit))
@@ -52,78 +52,45 @@ router.get('/', optionalAuth, async (req, res) => {
 
     const total = await Asteroid.countDocuments(query);
 
-    // If no asteroids in database, return sample data for demo
+    // If no asteroids found, try to sync data from NASA API
     if (total === 0) {
-      asteroids = [
-        {
-          id: "2099942",
-          neo_reference_id: "2099942",
-          name: "99942 Apophis (2004 MN4)",
-          estimatedDiameter: {
-            kilometers: {
-              estimated_diameter_min: 0.3170031414,
-              estimated_diameter_max: 0.7090571767
-            }
+      console.log('⚠️ No asteroids in database, attempting to sync from NASA API...');
+      try {
+        await nasaApi.syncAsteroidData();
+        
+        // Retry the query after sync
+        const newAsteroids = await Asteroid.find(query)
+          .sort({ [sortBy]: sortDirection })
+          .skip(skip)
+          .limit(parseInt(limit))
+          .lean();
+        const newTotal = await Asteroid.countDocuments(query);
+        
+        return res.json({
+          asteroids: newAsteroids,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(newTotal / parseInt(limit)),
+            totalItems: newTotal,
+            itemsPerPage: parseInt(limit)
           },
-          isPotentiallyHazardousAsteroid: true,
-          closeApproachData: [
-            {
-              closeApproachDate: "2029-04-13",
-              relativeVelocity: {
-                kilometersPerSecond: "7.4330131766"
-              }
-            }
-          ]
-        },
-        {
-          id: "3542519",
-          neo_reference_id: "3542519",
-          name: "2010 PK9",
-          estimatedDiameter: {
-            kilometers: {
-              estimated_diameter_min: 0.1079622,
-              estimated_diameter_max: 0.2414939
-            }
-          },
-          isPotentiallyHazardousAsteroid: false,
-          closeApproachData: [
-            {
-              closeApproachDate: "2024-03-15",
-              relativeVelocity: {
-                kilometersPerSecond: "15.2"
-              }
-            }
-          ]
-        },
-        {
-          id: "54016101",
-          neo_reference_id: "54016101",
-          name: "2020 XL5",
-          estimatedDiameter: {
-            kilometers: {
-              estimated_diameter_min: 0.8,
-              estimated_diameter_max: 1.8
-            }
-          },
-          isPotentiallyHazardousAsteroid: true,
-          closeApproachData: [
-            {
-              closeApproachDate: "2025-12-08",
-              relativeVelocity: {
-                kilometersPerSecond: "25.8"
-              }
-            }
-          ]
-        }
-      ];
+          message: newTotal > 0 ? 'Data loaded from NASA API' : 'No asteroids available'
+        });
+      } catch (syncError) {
+        console.error('Failed to sync NASA data:', syncError.message);
+        return res.status(503).json({ 
+          error: 'No asteroid data available and unable to fetch from NASA API',
+          details: syncError.message 
+        });
+      }
     }
 
     res.json({
       asteroids,
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit)) || 1,
-        totalItems: total || asteroids.length,
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
         itemsPerPage: parseInt(limit)
       }
     });
@@ -274,6 +241,23 @@ router.get('/stats/overview', async (req, res) => {
   } catch (error) {
     console.error('Stats fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+// Get NASA API status
+router.get('/nasa/status', async (req, res) => {
+  try {
+    const apiStatus = nasaApi.getApiStatus();
+    const lastSync = await Asteroid.findOne({}, {}, { sort: { 'metadata.lastUpdated': -1 } });
+    
+    res.json({
+      nasa_api: apiStatus,
+      last_sync: lastSync?.metadata?.lastUpdated || null,
+      database_count: await Asteroid.countDocuments()
+    });
+  } catch (error) {
+    console.error('NASA status error:', error);
+    res.status(500).json({ error: 'Failed to get NASA API status' });
   }
 });
 

@@ -75,6 +75,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Orbitron', 'Arial', sans-serif;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: var(--text-primary) !important;
 }
 
 h1 {
@@ -88,12 +89,25 @@ h1 {
 
 h2 {
   font-size: 2rem;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
 }
 
 h3 {
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+}
+
+/* Ensure text readability on animated background */
+p, div, span, .lead {
+  color: var(--text-primary) !important;
+}
+
+p.text-secondary, .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+p.text-muted, .text-muted {
+  color: var(--text-muted) !important;
 }
 
 /* Card Styles */
@@ -103,6 +117,19 @@ h3 {
   border-radius: 12px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  color: var(--text-primary) !important;
+}
+
+.card * {
+  color: var(--text-primary) !important;
+}
+
+.card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+.card .text-secondary {
+  color: var(--text-secondary) !important;
 }
 
 .card:hover {
@@ -115,6 +142,15 @@ h3 {
   background: rgba(0, 102, 204, 0.1);
   border-bottom: 1px solid var(--border-color);
   border-radius: 12px 12px 0 0 !important;
+  color: var(--text-primary) !important;
+}
+
+.card-body {
+  color: var(--text-primary) !important;
+}
+
+.card-footer {
+  color: var(--text-primary) !important;
 }
 
 /* Button Styles */
@@ -396,4 +432,103 @@ h3 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
+}
+
+/* Text Color Overrides for Better Visibility */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-light {
+  color: #ffffff !important;
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-dark {
+  color: #333333 !important;
+}
+
+/* Bootstrap Text Utilities Override */
+.text-body {
+  color: var(--text-primary) !important;
+}
+
+.text-body-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Form Text Override */
+.form-text {
+  color: var(--text-muted) !important;
+}
+
+/* Card Text Override */
+.card-text {
+  color: var(--text-primary) !important;
+}
+
+.card-title {
+  color: var(--text-primary) !important;
+}
+
+.card-subtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* List Item Text */
+.list-group-item {
+  color: var(--text-primary) !important;
+}
+
+/* Dropdown Text */
+.dropdown-item {
+  color: var(--text-primary) !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(0, 102, 204, 0.2) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Table Text */
+.table {
+  color: var(--text-primary) !important;
+}
+
+.table td, .table th {
+  color: var(--text-primary) !important;
+}
+
+/* Modal Text */
+.modal-title {
+  color: var(--text-primary) !important;
+}
+
+.modal-body {
+  color: var(--text-primary) !important;
+}
+
+/* Toast Text */
+.toast {
+  color: var(--text-primary) !important;
+}
+
+/* Popover and Tooltip Text */
+.popover {
+  color: var(--text-primary) !important;
+}
+
+.tooltip-inner {
+  color: var(--text-primary) !important;
 }

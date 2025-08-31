@@ -1,0 +1,43 @@
+{
+  "name": "astroimpact-simulator",
+  "version": "1.0.0",
+  "description": "AstroImpact Simulator - NASA Space Apps Challenge 2025",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "deploy": "npm run build && npm run start"
+  },
+  "keywords": [
+    "nasa",
+    "space-apps-challenge",
+    "asteroid",
+    "simulation",
+    "mern-stack",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "NASA Space Apps Challenge Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/astroimpact-simulator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/astroimpact-simulator/issues"
+  },
+  "homepage": "https://github.com/your-username/astroimpact-simulator#readme"
+}

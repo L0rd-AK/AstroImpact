@@ -27,6 +27,8 @@ const Navigation = () => {
               </Nav.Link>
             </LinkContainer>
             
+            {/* Temporarily disabled simulator link */}
+            {/*
             {isAuthenticated && (
               <LinkContainer to="/simulator">
                 <Nav.Link>
@@ -35,6 +37,7 @@ const Navigation = () => {
                 </Nav.Link>
               </LinkContainer>
             )}
+            */}
             
             <LinkContainer to="/community">
               <Nav.Link>

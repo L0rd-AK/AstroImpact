@@ -4,7 +4,7 @@ import { Container } from 'react-bootstrap';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
-import Simulator from './pages/Simulator';
+// import Simulator from './pages/Simulator';
 import Community from './pages/Community';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
@@ -12,7 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AsteroidExplorer from './pages/AsteroidExplorer';
 import SimulationResults from './pages/SimulationResults';
-import Enhanced3DTest from './pages/Enhanced3DTest';
+// import Enhanced3DTest from './pages/Enhanced3DTest';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
@@ -40,7 +40,8 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/simulation/:id" element={<SimulationResults />} />
-          <Route path="/3d-test" element={<Enhanced3DTest />} />
+          {/* Temporarily disabled 3D routes */}
+          {/* <Route path="/3d-test" element={<Enhanced3DTest />} /> */}
           
           {/* Protected Routes */}
           <Route 
@@ -51,6 +52,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          {/* Temporarily disabled simulator route */}
+          {/* 
           <Route 
             path="/simulator" 
             element={
@@ -59,6 +62,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          */}
           <Route 
             path="/profile" 
             element={

@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 require('dotenv').config();
 
 // Import routes
@@ -14,7 +12,6 @@ const simulationRoutes = require('./routes/simulations');
 const userRoutes = require('./routes/users');
 
 const app = express();
-const server = createServer(app);
 
 // Trust proxy for rate limiting (fixes X-Forwarded-For warning)
 app.set('trust proxy', 1);
@@ -25,11 +22,6 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200
 };
-
-// Socket.io setup
-const io = new Server(server, {
-  cors: corsOptions
-});
 
 // Security middleware
 app.use(helmet());
@@ -54,42 +46,29 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/astroimpa
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log('👤 User connected:', socket.id);
-
-  // Join simulation room
-  socket.on('join-simulation', (simulationId) => {
-    socket.join(`simulation-${simulationId}`);
-    console.log(`User ${socket.id} joined simulation ${simulationId}`);
-  });
-
-  // Handle voting
-  socket.on('vote-mitigation', (data) => {
-    socket.to(`simulation-${data.simulationId}`).emit('vote-update', data);
-  });
-
-  // Handle new simulation sharing
-  socket.on('share-simulation', (data) => {
-    socket.broadcast.emit('new-simulation', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('👤 User disconnected:', socket.id);
-  });
-});
-
-// Make io accessible to routes
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
-
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/asteroids', asteroidRoutes);
 app.use('/api/simulations', simulationRoutes);
 app.use('/api/users', userRoutes);
+
+// Home route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'AstroImpact Simulator API',
+    version: '1.0.0',
+    challenge: 'NASA Space Apps Challenge 2025 - Meteor Madness',
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      auth: '/api/auth',
+      asteroids: '/api/asteroids',
+      simulations: '/api/simulations',
+      users: '/api/users',
+      health: '/api/health'
+    },
+    documentation: 'Visit /api/health for system status'
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -97,7 +76,8 @@ app.get('/api/health', (req, res) => {
     status: 'OK', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
@@ -117,7 +97,15 @@ app.use('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+
+// Start server
+if (process.env.NODE_ENV === 'production') {
+  // For Vercel deployment - export app
+  module.exports = app;
+} else {
+  // For local development - start server
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}

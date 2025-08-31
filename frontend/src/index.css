@@ -37,7 +37,7 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
+  background:
     radial-gradient(ellipse at top, rgba(0, 102, 204, 0.1) 0%, transparent 70%),
     radial-gradient(ellipse at bottom, rgba(255, 107, 53, 0.1) 0%, transparent 70%),
     linear-gradient(180deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
@@ -46,8 +46,15 @@ body::before {
 }
 
 @keyframes backgroundShift {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
 }
 
 /* Starfield animation */
@@ -58,7 +65,7 @@ body::after {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
+  background:
     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="100" cy="200" r="1" fill="white" opacity="0.6"/><circle cx="300" cy="100" r="0.5" fill="white" opacity="0.4"/><circle cx="500" cy="300" r="1.5" fill="white" opacity="0.8"/><circle cx="700" cy="150" r="0.8" fill="white" opacity="0.5"/><circle cx="200" cy="400" r="1.2" fill="white" opacity="0.7"/><circle cx="800" cy="500" r="0.6" fill="white" opacity="0.3"/><circle cx="150" cy="600" r="1" fill="white" opacity="0.6"/><circle cx="450" cy="700" r="0.4" fill="white" opacity="0.4"/><circle cx="650" cy="800" r="1.1" fill="white" opacity="0.7"/><circle cx="900" cy="300" r="0.7" fill="white" opacity="0.5"/></svg>') repeat;
   animation: stars 100s linear infinite;
   z-index: -1;
@@ -66,12 +73,22 @@ body::after {
 }
 
 @keyframes stars {
-  from { transform: translateY(0); }
-  to { transform: translateY(-1000px); }
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-1000px);
+  }
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Orbitron', 'Arial', sans-serif;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -98,15 +115,20 @@ h3 {
 }
 
 /* Ensure text readability on animated background */
-p, div, span, .lead {
+p,
+div,
+span,
+.lead {
   color: var(--text-primary) !important;
 }
 
-p.text-secondary, .text-secondary {
+p.text-secondary,
+.text-secondary {
   color: var(--text-secondary) !important;
 }
 
-p.text-muted, .text-muted {
+p.text-muted,
+.text-muted {
   color: var(--text-muted) !important;
 }
 
@@ -115,6 +137,7 @@ p.text-muted, .text-muted {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   color: var(--text-primary) !important;
@@ -211,7 +234,8 @@ p.text-muted, .text-muted {
 }
 
 /* Form Styles */
-.form-control, .form-select {
+.form-control,
+.form-select {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
@@ -219,7 +243,8 @@ p.text-muted, .text-muted {
   transition: all 0.3s ease;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
@@ -236,12 +261,13 @@ p.text-muted, .text-muted {
   margin-bottom: 0.5rem;
 }
 
-/* Navigation Styles */
 .navbar {
   background: rgba(10, 10, 10, 0.95) !important;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
 }
+
 
 .navbar-brand {
   font-family: 'Orbitron', sans-serif;
@@ -259,7 +285,8 @@ p.text-muted, .text-muted {
   transition: color 0.3s ease;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--primary-color) !important;
 }
 
@@ -275,7 +302,9 @@ p.text-muted, .text-muted {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Alert Styles */
@@ -328,11 +357,11 @@ p.text-muted, .text-muted {
   color: #000;
 }
 
-/* Modal Styles */
 .modal-content {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -387,11 +416,11 @@ p.text-muted, .text-muted {
   h1 {
     font-size: 2rem;
   }
-  
+
   h2 {
     font-size: 1.5rem;
   }
-  
+
   .card {
     margin-bottom: 1rem;
   }
@@ -399,136 +428,171 @@ p.text-muted, .text-muted {
 
 /* Utility Classes */
 .text-glow {
-  text-shadow: 0 0 10px currentColor;
+  text-shadow: 0 0 10px var(--primary-color);
 }
 
 .glass-effect {
   background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.hover-scale {
-  transition: transform 0.3s ease;
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--darker-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+  }
+
+  /* Text Color Overrides for Better Visibility */
+  .text-primary {
+    color: var(--text-primary) !important;
+  }
+
+  .text-secondary {
+    color: var(--text-secondary) !important;
+  }
+
+  .text-muted {
+    color: var(--text-muted) !important;
+  }
+
+  .text-light {
+    color: #ffffff !important;
+  }
+
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  .text-dark {
+    color: #333333 !important;
+  }
+
+  /* Bootstrap Text Utilities Override */
+  .text-body {
+    color: var(--text-primary) !important;
+  }
+
+  .text-body-secondary {
+    color: var(--text-secondary) !important;
+  }
+
+  /* Form Text Override */
+  .form-text {
+    color: var(--text-muted) !important;
+  }
+
+  /* Card Text Override */
+  .card-text {
+    color: var(--text-primary) !important;
+  }
+
+  .card-title {
+    color: var(--text-primary) !important;
+  }
+
+  .card-subtitle {
+    color: var(--text-secondary) !important;
+  }
+
+  /* List Item Text */
+  .list-group-item {
+    color: var(--text-primary) !important;
+  }
+
+  /* Dropdown Text */
+  .dropdown-item {
+    color: var(--text-primary) !important;
+  }
+
+  .dropdown-item:hover {
+    background-color: rgba(0, 102, 204, 0.2) !important;
+    color: var(--text-primary) !important;
+  }
+
+  /* Table Text */
+  .table {
+    color: var(--text-primary) !important;
+  }
+
+  .table td,
+  .table th {
+    color: var(--text-primary) !important;
+  }
+
+  /* Modal Text */
+  .modal-title {
+    color: var(--text-primary) !important;
+  }
+
+  .modal-body {
+    color: var(--text-primary) !important;
+  }
+
+  /* Toast Text */
+  .toast {
+    color: var(--text-primary) !important;
+  }
+
+  /* Popover and Tooltip Text */
+  .popover {
+    color: var(--text-primary) !important;
+  }
+
+  .tooltip-inner {
+    color: var(--text-primary) !important;
+  }
+
+/* Animation Classes - Replacement for react-spring */
+.fade-in-animation {
+  animation: fadeIn 1.2s ease-out forwards;
+  opacity: 0;
 }
 
-.hover-scale:hover {
-  transform: scale(1.05);
+.slide-in-animation {
+  animation: slideIn 1.2s ease-out 0.3s forwards;
+  opacity: 0;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: var(--darker-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color);
-}
-
-/* Text Color Overrides for Better Visibility */
-.text-primary {
-  color: var(--text-primary) !important;
-}
-
-.text-secondary {
-  color: var(--text-secondary) !important;
-}
-
-.text-muted {
-  color: var(--text-muted) !important;
-}
-
-.text-light {
-  color: #ffffff !important;
-}
-
-.text-white {
-  color: #ffffff !important;
-}
-
-.text-dark {
-  color: #333333 !important;
-}
-
-/* Bootstrap Text Utilities Override */
-.text-body {
-  color: var(--text-primary) !important;
-}
-
-.text-body-secondary {
-  color: var(--text-secondary) !important;
-}
-
-/* Form Text Override */
-.form-text {
-  color: var(--text-muted) !important;
-}
-
-/* Card Text Override */
-.card-text {
-  color: var(--text-primary) !important;
-}
-
-.card-title {
-  color: var(--text-primary) !important;
-}
-
-.card-subtitle {
-  color: var(--text-secondary) !important;
-}
-
-/* List Item Text */
-.list-group-item {
-  color: var(--text-primary) !important;
-}
-
-/* Dropdown Text */
-.dropdown-item {
-  color: var(--text-primary) !important;
-}
-
-.dropdown-item:hover {
-  background-color: rgba(0, 102, 204, 0.2) !important;
-  color: var(--text-primary) !important;
-}
-
-/* Table Text */
-.table {
-  color: var(--text-primary) !important;
-}
-
-.table td, .table th {
-  color: var(--text-primary) !important;
-}
-
-/* Modal Text */
-.modal-title {
-  color: var(--text-primary) !important;
-}
-
-.modal-body {
-  color: var(--text-primary) !important;
-}
-
-/* Toast Text */
-.toast {
-  color: var(--text-primary) !important;
-}
-
-/* Popover and Tooltip Text */
-.popover {
-  color: var(--text-primary) !important;
-}
-
-.tooltip-inner {
-  color: var(--text-primary) !important;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

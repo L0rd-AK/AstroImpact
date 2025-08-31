@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
 import toast from 'react-hot-toast';
 
 const SimulationContext = createContext();
@@ -16,37 +15,10 @@ export const useSimulation = () => {
 };
 
 export const SimulationProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
   const [simulations, setSimulations] = useState([]);
   const [currentSimulation, setCurrentSimulation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [asteroids, setAsteroids] = useState([]);
-
-  // Initialize socket connection
-  useEffect(() => {
-    const newSocket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000');
-    setSocket(newSocket);
-
-    // Listen for real-time updates
-    newSocket.on('new-simulation', (data) => {
-      toast.success(`New simulation by ${data.user}: ${data.asteroid}`);
-      fetchPublicSimulations(); // Refresh the list
-    });
-
-    newSocket.on('vote-update', (data) => {
-      setSimulations(prev => 
-        prev.map(sim => 
-          sim._id === data.simulationId 
-            ? { ...sim, votes: { likes: data.likes, dislikes: data.dislikes } }
-            : sim
-        )
-      );
-    });
-
-    return () => {
-      newSocket.close();
-    };
-  }, []);
 
   const fetchAsteroids = async (params = {}) => {
     try {
@@ -101,16 +73,6 @@ export const SimulationProvider = ({ children }) => {
       const newSimulation = response.data.simulation;
       
       setCurrentSimulation(newSimulation);
-      
-      // Join the simulation room for real-time updates
-      if (socket && newSimulation.isPublic) {
-        socket.emit('share-simulation', {
-          id: newSimulation._id,
-          user: newSimulation.user?.username,
-          asteroid: newSimulation.asteroid?.name,
-          location: newSimulation.impactLocation
-        });
-      }
       
       toast.success('Simulation completed successfully!');
       return { success: true, simulation: newSimulation };
@@ -168,16 +130,6 @@ export const SimulationProvider = ({ children }) => {
   const voteOnSimulation = async (simulationId, vote) => {
     try {
       const response = await axios.post(`/api/simulations/${simulationId}/vote`, { vote });
-      
-      // Join simulation room for real-time updates
-      if (socket) {
-        socket.emit('join-simulation', simulationId);
-        socket.emit('vote-mitigation', {
-          simulationId,
-          vote,
-          ...response.data.votes
-        });
-      }
       
       toast.success('Vote recorded!');
       return response.data;
@@ -249,7 +201,6 @@ export const SimulationProvider = ({ children }) => {
   };
 
   const value = {
-    socket,
     simulations,
     currentSimulation,
     loading,

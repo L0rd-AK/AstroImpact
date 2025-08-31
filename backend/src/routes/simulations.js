@@ -116,17 +116,6 @@ router.post('/', auth, async (req, res) => {
       }
     });
 
-    // Emit real-time update if public
-    if (isPublic && req.io) {
-      req.io.emit('new-simulation', {
-        id: simulation._id,
-        user: req.user.username,
-        asteroid: asteroid.name,
-        location: impactLocation,
-        severity: calculateSeverityScore(finalResults)
-      });
-    }
-
     res.status(201).json({
       message: 'Simulation completed successfully',
       simulation,
@@ -302,16 +291,6 @@ router.post('/:id/vote', auth, validate(schemas.vote), async (req, res) => {
     if (vote === 'like') {
       await User.findByIdAndUpdate(simulation.user, {
         $inc: { 'stats.votesReceived': 1, 'stats.points': 5 }
-      });
-    }
-
-    // Emit real-time vote update
-    if (req.io) {
-      req.io.to(`simulation-${id}`).emit('vote-update', {
-        simulationId: id,
-        likes: simulation.votes.likes,
-        dislikes: simulation.votes.dislikes,
-        totalVotes: simulation.votes.likes - simulation.votes.dislikes
       });
     }
 

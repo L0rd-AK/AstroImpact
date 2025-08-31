@@ -3,26 +3,12 @@ import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { useSimulation } from '../context/SimulationContext';
-import { animated, useSpring } from '@react-spring/web';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
   const { fetchFeaturedAsteroids, getAsteroidStats, getSimulationStats } = useSimulation();
   const [featuredAsteroids, setFeaturedAsteroids] = useState([]);
   const [stats, setStats] = useState({});
-
-  const fadeIn = useSpring({
-    from: { opacity: 0, transform: 'translateY(50px)' },
-    to: { opacity: 1, transform: 'translateY(0px)' },
-    config: { tension: 120, friction: 14 }
-  });
-
-  const slideIn = useSpring({
-    from: { opacity: 0, transform: 'translateX(-50px)' },
-    to: { opacity: 1, transform: 'translateX(0px)' },
-    delay: 300,
-    config: { tension: 120, friction: 14 }
-  });
 
   useEffect(() => {
     loadData();
@@ -48,7 +34,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero-section py-5 mt-5">
         <Container>
-          <animated.div style={fadeIn}>
+          <div className="fade-in-animation">
             <Row className="align-items-center min-vh-100">
               <Col lg={6}>
                 <h1 className="display-4 fw-bold mb-4 text-glow">
@@ -98,14 +84,14 @@ const Home = () => {
                 </div>
               </Col>
             </Row>
-          </animated.div>
+          </div>
         </Container>
       </section>
 
       {/* Statistics Section */}
       <section className="stats-section py-5 bg-dark">
         <Container>
-          <animated.div style={slideIn}>
+          <div className="slide-in-animation">
             <Row className="text-center">
               <Col md={3} className="mb-4">
                 <Card className="glass-effect h-100">
@@ -147,7 +133,7 @@ const Home = () => {
                 </Card>
               </Col>
             </Row>
-          </animated.div>
+          </div>
         </Container>
       </section>
 
@@ -158,7 +144,7 @@ const Home = () => {
             <Col>
               <h2 className="text-center mb-5">Featured Near-Earth Asteroids</h2>
               <Row>
-                {featuredAsteroids.map((asteroid, index) => (
+                {featuredAsteroids?.map((asteroid, index) => (
                   <Col md={6} lg={4} key={asteroid._id} className="mb-4">
                     <Card className="h-100 hover-scale">
                       <Card.Header className="d-flex justify-content-between align-items-center">

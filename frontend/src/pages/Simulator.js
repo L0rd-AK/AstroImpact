@@ -42,7 +42,7 @@ const Simulator = () => {
   
   const [selectedAsteroid, setSelectedAsteroid] = useState(null);
   const [asteroids, setAsteroids] = useState([]);
-  const [impactLocation, setImpactLocation] = useState({ lat: 40.7128, lng: -74.0060 }); // Default to NYC
+  const [impactLocation, setImpactLocation] = useState({ lat: 23.8785, lng: 90.3217 }); // Default to DIU 23.8785, 90.3217
   const [impactAngle, setImpactAngle] = useState(45);
   const [impactVelocity, setImpactVelocity] = useState(20);
   const [simulationResults, setSimulationResults] = useState(null);

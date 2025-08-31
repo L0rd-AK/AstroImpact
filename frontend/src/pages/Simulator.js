@@ -173,8 +173,9 @@ const Simulator = () => {
               {/* Asteroid Selection */}
               <Form.Group className="mb-3">
                 <Form.Label>Select Asteroid</Form.Label>
-                <Form.Select 
-                  value={selectedAsteroid?.id || ''} 
+                <Form.Select
+                  className='text-white bg-dark'
+                  value={selectedAsteroid?.id || ''}
                   onChange={(e) => {
                     const asteroid = asteroids.find(a => a.id === e.target.value);
                     setSelectedAsteroid(asteroid);

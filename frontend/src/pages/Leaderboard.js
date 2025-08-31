@@ -71,6 +71,7 @@ const Leaderboard = () => {
             <Card.Body>
               <Form.Label>Timeframe</Form.Label>
               <Form.Select
+                className='text-white bg-dark'
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
               >

@@ -143,6 +143,7 @@ const AsteroidExplorer = () => {
                 <Col md={6} lg={3} className="mb-3">
                   <Form.Label>Hazard Level</Form.Label>
                   <Form.Select
+                    className='text-white bg-dark'
                     value={filters.hazardous}
                     onChange={(e) => handleFilterChange('hazardous', e.target.value)}
                   >
@@ -175,6 +176,7 @@ const AsteroidExplorer = () => {
                 <Col md={6} lg={3} className="mb-3">
                   <Form.Label>Sort By</Form.Label>
                   <Form.Select
+                    className='text-white bg-dark'
                     value={`${filters.sortBy}-${filters.sortOrder}`}
                     onChange={(e) => {
                       const [sortBy, sortOrder] = e.target.value.split('-');

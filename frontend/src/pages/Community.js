@@ -53,6 +53,7 @@ const Community = () => {
                 <Col md={6}>
                   <Form.Label>Sort By</Form.Label>
                   <Form.Select
+                    className='text-white bg-dark'
                     value={filters.sortBy}
                     onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
                   >

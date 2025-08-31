@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AsteroidExplorer from './pages/AsteroidExplorer';
 import SimulationResults from './pages/SimulationResults';
+import Enhanced3DTest from './pages/Enhanced3DTest';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/simulation/:id" element={<SimulationResults />} />
+          <Route path="/3d-test" element={<Enhanced3DTest />} />
           
           {/* Protected Routes */}
           <Route 

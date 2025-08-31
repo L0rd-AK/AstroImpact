@@ -49,6 +49,14 @@ const Navigation = () => {
                 Leaderboard
               </Nav.Link>
             </LinkContainer>
+            
+            <LinkContainer to="/3d-test">
+              <Nav.Link>
+                <i className="bi bi-cpu me-1"></i>
+                3D Test
+                <Badge bg="success" className="ms-1">NEW</Badge>
+              </Nav.Link>
+            </LinkContainer>
           </Nav>
           
           <Nav>

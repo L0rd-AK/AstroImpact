@@ -23,6 +23,16 @@ const Impact3D = React.lazy(() =>
   })
 );
 
+const EnhancedImpact3D = React.lazy(() => 
+  import('./WorkingEnhancedImpact3D').catch(err => {
+    console.error('Failed to load WorkingEnhancedImpact3D:', err);
+    // Fallback to regular Impact3D if enhanced version fails
+    return import('./Impact3D').catch(() => ({
+      default: () => <div>3D Impact view unavailable</div>
+    }));
+  })
+);
+
 // Loading fallback component
 const ThreeJSLoader = () => (
   <div 
@@ -121,6 +131,14 @@ export const SafeImpact3D = (props) => (
   </ThreeJSErrorBoundary>
 );
 
+export const SafeEnhancedImpact3D = (props) => (
+  <ThreeJSErrorBoundary>
+    <Suspense fallback={<ThreeJSLoader />}>
+      <EnhancedImpact3D {...props} />
+    </Suspense>
+  </ThreeJSErrorBoundary>
+);
+
 // Feature detection
 export const is3DSupported = () => {
   try {
@@ -132,5 +150,5 @@ export const is3DSupported = () => {
   }
 };
 
-const ThreeJSComponents = { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, is3DSupported };
+const ThreeJSComponents = { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, SafeEnhancedImpact3D, is3DSupported };
 export default ThreeJSComponents;

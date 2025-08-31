@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { toast } from 'react-hot-toast';
 import L from 'leaflet';
 import { AuthContext } from '../context/AuthContext';
-import { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, is3DSupported } from '../components/3D';
+import { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, SafeEnhancedImpact3D, is3DSupported } from '../components/3D';
 import 'leaflet/dist/leaflet.css';
 
 // Fix missing leaflet marker icons
@@ -52,6 +52,7 @@ const Simulator = () => {
   const [viewMode, setViewMode] = useState('2d'); // '2d', '3d-earth', '3d-asteroid', '3d-impact'
   const [animate3D, setAnimate3D] = useState(false);
   const [webGL3DSupported, setWebGL3DSupported] = useState(true);
+  const [useEnhanced3D, setUseEnhanced3D] = useState(true); // Toggle for enhanced vs basic 3D
   
   useEffect(() => {
     loadAsteroids();
@@ -397,12 +398,26 @@ const Simulator = () => {
                 {/* 3D Impact Simulation */}
                 {viewMode === '3d-impact' && (
                   <div style={{ height: '100%', background: '#000' }}>
-                    <SafeImpact3D
-                      impactData={simulationResults?.results}
-                      asteroidData={selectedAsteroid}
-                      animate={animate3D}
-                      onAnimationComplete={() => setAnimate3D(false)}
-                    />
+                    {useEnhanced3D ? (
+                      <SafeEnhancedImpact3D
+                        simulationData={{
+                          impactData: simulationResults?.results,
+                          asteroidData: selectedAsteroid,
+                          impactLocation,
+                          impactAngle,
+                          impactVelocity,
+                          animate: animate3D
+                        }}
+                        onAnimationComplete={() => setAnimate3D(false)}
+                      />
+                    ) : (
+                      <SafeImpact3D
+                        impactData={simulationResults?.results}
+                        asteroidData={selectedAsteroid}
+                        animate={animate3D}
+                        onAnimationComplete={() => setAnimate3D(false)}
+                      />
+                    )}
                   </div>
                 )}
                 
@@ -440,15 +455,30 @@ const Simulator = () => {
                     right: '10px',
                     zIndex: 1000
                   }}>
-                    <Button
-                      variant={animate3D ? 'danger' : 'success'}
-                      size="sm"
-                      onClick={() => setAnimate3D(!animate3D)}
-                      disabled={loading}
-                    >
-                      <i className={`bi bi-${animate3D ? 'stop' : 'play'}-circle me-1`}></i>
-                      {animate3D ? 'Stop' : 'Animate'} Impact
-                    </Button>
+                    <div className="d-flex flex-column gap-2">
+                      <Button
+                        variant={animate3D ? 'danger' : 'success'}
+                        size="sm"
+                        onClick={() => setAnimate3D(!animate3D)}
+                        disabled={loading}
+                      >
+                        <i className={`bi bi-${animate3D ? 'stop' : 'play'}-circle me-1`}></i>
+                        {animate3D ? 'Stop' : 'Animate'} Impact
+                      </Button>
+                      
+                      {/* Enhanced 3D Toggle (only for impact view) */}
+                      {viewMode === '3d-impact' && (
+                        <Button
+                          variant={useEnhanced3D ? 'primary' : 'outline-primary'}
+                          size="sm"
+                          onClick={() => setUseEnhanced3D(!useEnhanced3D)}
+                          title={useEnhanced3D ? 'Switch to Basic 3D' : 'Switch to Enhanced 3D'}
+                        >
+                          <i className={`bi bi-${useEnhanced3D ? 'cpu' : 'cpu-fill'} me-1`}></i>
+                          {useEnhanced3D ? 'Enhanced' : 'Basic'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

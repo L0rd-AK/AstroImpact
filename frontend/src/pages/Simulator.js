@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { toast } from 'react-hot-toast';
 import L from 'leaflet';
 import { AuthContext } from '../context/AuthContext';
+import { SafeEarth3D, SafeAsteroid3D, SafeImpact3D, is3DSupported } from '../components/3D';
 import 'leaflet/dist/leaflet.css';
 
 // Fix missing leaflet marker icons
@@ -48,9 +49,14 @@ const Simulator = () => {
   const [simulationResults, setSimulationResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState('2d'); // '2d', '3d-earth', '3d-asteroid', '3d-impact'
+  const [animate3D, setAnimate3D] = useState(false);
+  const [webGL3DSupported, setWebGL3DSupported] = useState(true);
   
   useEffect(() => {
     loadAsteroids();
+    // Check 3D support
+    setWebGL3DSupported(is3DSupported());
   }, []);
 
   const loadAsteroids = async () => {
@@ -150,6 +156,24 @@ const Simulator = () => {
 
   return (
     <Container className="py-5" style={{ marginTop: '100px' }}>
+      {/* 3D Support Warning */}
+      {!webGL3DSupported && (
+        <Alert variant="warning" className="mb-4">
+          <Alert.Heading>
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            Limited 3D Support
+          </Alert.Heading>
+          <p>
+            Your browser doesn't support WebGL, so 3D visualizations are disabled. 
+            You can still use the full-featured 2D map simulator.
+          </p>
+          <hr />
+          <p className="mb-0">
+            For the best experience, try using a modern browser like Chrome, Firefox, or Edge.
+          </p>
+        </Alert>
+      )}
+      
       <Row>
         <Col>
           <h1>
@@ -158,6 +182,9 @@ const Simulator = () => {
           </h1>
           <p className="text-white mb-4">
             Model asteroid impact scenarios with real NASA data
+            {webGL3DSupported && <span className="text-success ms-2">
+              <i className="bi bi-check-circle me-1"></i>3D Ready
+            </span>}
           </p>
         </Col>
       </Row>
@@ -277,29 +304,153 @@ const Simulator = () => {
           </Card>
         </Col>
 
-        {/* Map Panel */}
+        {/* Visualization Panel */}
         <Col lg={8}>
           <Card className="glass-effect">
-            <Card.Header>
-              <h5><i className="bi bi-geo-alt me-2"></i>Impact Location</h5>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <h5><i className="bi bi-geo-alt me-2"></i>Impact Visualization</h5>
+              
+              {/* View Mode Buttons */}
+              <div className="btn-group" role="group">
+                <Button
+                  variant={viewMode === '2d' ? 'primary' : 'outline-primary'}
+                  size="sm"
+                  onClick={() => setViewMode('2d')}
+                >
+                  <i className="bi bi-map me-1"></i>2D Map
+                </Button>
+                <Button
+                  variant={viewMode === '3d-earth' ? 'primary' : 'outline-primary'}
+                  size="sm"
+                  onClick={() => setViewMode('3d-earth')}
+                  disabled={!webGL3DSupported}
+                  title={!webGL3DSupported ? 'WebGL not supported' : ''}
+                >
+                  <i className="bi bi-globe me-1"></i>3D Earth
+                </Button>
+                <Button
+                  variant={viewMode === '3d-asteroid' ? 'primary' : 'outline-primary'}
+                  size="sm"
+                  onClick={() => setViewMode('3d-asteroid')}
+                  disabled={!webGL3DSupported || !selectedAsteroid}
+                  title={!webGL3DSupported ? 'WebGL not supported' : !selectedAsteroid ? 'Select an asteroid first' : ''}
+                >
+                  <i className="bi bi-asterisk me-1"></i>3D Asteroid
+                </Button>
+                <Button
+                  variant={viewMode === '3d-impact' ? 'primary' : 'outline-primary'}
+                  size="sm"
+                  onClick={() => setViewMode('3d-impact')}
+                  disabled={!webGL3DSupported}
+                  title={!webGL3DSupported ? 'WebGL not supported' : ''}
+                >
+                  <i className="bi bi-exclamation-triangle me-1"></i>3D Impact
+                </Button>
+              </div>
             </Card.Header>
+            
             <Card.Body className="p-0">
               <div style={{ height: '500px', width: '100%' }}>
-                <MapContainer
-                  center={[impactLocation.lat, impactLocation.lng]}
-                  zoom={6}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <MapClickHandler onLocationSelect={handleLocationSelect} />
-                  <Marker 
-                    position={[impactLocation.lat, impactLocation.lng]} 
-                    icon={impactIcon}
-                  />
-                </MapContainer>
+                {/* 2D Map View */}
+                {viewMode === '2d' && (
+                  <MapContainer
+                    center={[impactLocation.lat, impactLocation.lng]}
+                    zoom={6}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <MapClickHandler onLocationSelect={handleLocationSelect} />
+                    <Marker 
+                      position={[impactLocation.lat, impactLocation.lng]} 
+                      icon={impactIcon}
+                    />
+                  </MapContainer>
+                )}
+                
+                {/* 3D Earth View */}
+                {viewMode === '3d-earth' && (
+                  <div style={{ height: '100%', background: '#000' }}>
+                    <SafeEarth3D
+                      impactLocation={impactLocation}
+                      asteroidData={selectedAsteroid}
+                      showImpact={!!simulationResults}
+                      animateImpact={animate3D}
+                      onAnimationComplete={() => setAnimate3D(false)}
+                    />
+                  </div>
+                )}
+                
+                {/* 3D Asteroid View */}
+                {viewMode === '3d-asteroid' && selectedAsteroid && (
+                  <div style={{ height: '100%', background: '#000' }}>
+                    <SafeAsteroid3D
+                      asteroidData={selectedAsteroid}
+                      showComparison={true}
+                      showTrajectory={animate3D}
+                    />
+                  </div>
+                )}
+                
+                {/* 3D Impact Simulation */}
+                {viewMode === '3d-impact' && (
+                  <div style={{ height: '100%', background: '#000' }}>
+                    <SafeImpact3D
+                      impactData={simulationResults?.results}
+                      asteroidData={selectedAsteroid}
+                      animate={animate3D}
+                      onAnimationComplete={() => setAnimate3D(false)}
+                    />
+                  </div>
+                )}
+                
+                {/* View Instructions */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  left: '10px',
+                  background: 'rgba(0, 0, 0, 0.8)',
+                  color: '#ffffff',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  zIndex: 1000
+                }}>
+                  {viewMode === '2d' && (
+                    <>
+                      <i className="bi bi-info-circle me-1"></i>
+                      Click on map to set impact location
+                    </>
+                  )}
+                  {viewMode.startsWith('3d') && (
+                    <>
+                      <i className="bi bi-mouse me-1"></i>
+                      Drag to rotate • Scroll to zoom • Click objects for details
+                    </>
+                  )}
+                </div>
+                
+                {/* 3D Animation Controls */}
+                {viewMode.startsWith('3d') && simulationResults && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1000
+                  }}>
+                    <Button
+                      variant={animate3D ? 'danger' : 'success'}
+                      size="sm"
+                      onClick={() => setAnimate3D(!animate3D)}
+                      disabled={loading}
+                    >
+                      <i className={`bi bi-${animate3D ? 'stop' : 'play'}-circle me-1`}></i>
+                      {animate3D ? 'Stop' : 'Animate'} Impact
+                    </Button>
+                  </div>
+                )}
               </div>
             </Card.Body>
           </Card>

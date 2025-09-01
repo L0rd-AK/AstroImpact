@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, Badge, Modal } from 'react-bootstrap';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import L from 'leaflet';
 import { AuthContext } from '../context/AuthContext';
@@ -41,6 +42,8 @@ const MapClickHandler = ({ onLocationSelect }) => {
 
 const Simulator = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   
   const [selectedAsteroid, setSelectedAsteroid] = useState(null);
   const [asteroids, setAsteroids] = useState([]);
@@ -61,12 +64,34 @@ const Simulator = () => {
     setWebGL3DSupported(is3DSupported());
   }, []);
 
+  useEffect(() => {
+    // Handle pre-selected asteroid from navigation state or URL params
+    const asteroidId = location.state?.asteroidId || searchParams.get('asteroid');
+    if (asteroidId && asteroids.length > 0) {
+      const preSelectedAsteroid = asteroids.find(ast => ast._id === asteroidId);
+      if (preSelectedAsteroid) {
+        setSelectedAsteroid(preSelectedAsteroid);
+        toast.success(`Selected asteroid: ${preSelectedAsteroid.name}`);
+      }
+    }
+  }, [asteroids, location.state, searchParams]);
+
   const loadAsteroids = async () => {
     try {
       const response = await api.get('/api/asteroids');
       const data = response.data;
       setAsteroids(data.asteroids || []);
-      if (data.asteroids && data.asteroids.length > 0) {
+      
+      // Check for pre-selected asteroid
+      const asteroidId = location.state?.asteroidId || searchParams.get('asteroid');
+      if (asteroidId && data.asteroids) {
+        const preSelectedAsteroid = data.asteroids.find(ast => ast._id === asteroidId);
+        if (preSelectedAsteroid) {
+          setSelectedAsteroid(preSelectedAsteroid);
+        } else if (data.asteroids.length > 0) {
+          setSelectedAsteroid(data.asteroids[0]);
+        }
+      } else if (data.asteroids && data.asteroids.length > 0) {
         setSelectedAsteroid(data.asteroids[0]);
       }
     } catch (error) {

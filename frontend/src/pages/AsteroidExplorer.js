@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Table, Badge, InputGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useSimulation } from '../context/SimulationContext';
 
 const AsteroidExplorer = () => {
   const { fetchAsteroids, searchAsteroids, loading } = useSimulation();
+  const navigate = useNavigate();
   const [asteroids, setAsteroids] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -271,7 +273,9 @@ const AsteroidExplorer = () => {
                             <Button
                               variant="primary"
                               size="sm"
-                              onClick={() => window.location.href = `/simulator?asteroid=${asteroid._id}`}
+                              onClick={() => navigate('/simulator', { 
+                                state: { asteroidId: asteroid._id }
+                              })}
                             >
                               <i className="bi bi-play-circle"></i>
                             </Button>

@@ -192,7 +192,10 @@ const Home = () => {
                       
                       <Card.Footer>
                         {isAuthenticated ? (
-                          <LinkContainer to={`/simulator?asteroid=${asteroid._id}`}>
+                          <LinkContainer to={{
+                            pathname: '/simulator',
+                            search: `?asteroid=${asteroid._id}`
+                          }}>
                             <Button variant="primary" size="sm" className="w-100">
                               <i className="bi bi-play-circle me-1"></i>
                               Simulate Impact

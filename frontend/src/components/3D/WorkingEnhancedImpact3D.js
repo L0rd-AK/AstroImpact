@@ -10,6 +10,7 @@ const EnhancedEarth = React.memo(({
   impactLocation, 
   showImpact = false, 
   animationPhase = 'idle',
+  impactProgress = 0,
   materialSettings = {}
 }) => {
   const earthRef = useRef();
@@ -60,6 +61,15 @@ const EnhancedEarth = React.memo(({
     
     return [x, y, z];
   }, [impactLocation]);
+
+  // Tangent-space group orientation at impact point
+  const impactOrientation = useMemo(() => {
+    const normal = new THREE.Vector3(...impactMarkerPosition).normalize();
+    const quat = new THREE.Quaternion();
+    // Align +Z to the surface normal
+    quat.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+    return quat;
+  }, [impactMarkerPosition]);
 
   // Animation effects based on phase
   useFrame((state) => {
@@ -117,12 +127,35 @@ const EnhancedEarth = React.memo(({
         </mesh>
       )}
       
-      {/* Impact crater (simple version) */}
-      {showImpact && animationPhase !== 'idle' && (
-        <mesh position={impactMarkerPosition}>
-          <cylinderGeometry args={[0.1, 0.05, 0.02, 16]} />
-          <meshStandardMaterial color="#8B4513" />
-        </mesh>
+      {/* Crater and Shockwave on surface */}
+      {impactLocation && (animationPhase === 'impact' || animationPhase === 'explosion' || animationPhase === 'aftermath') && (
+        <group position={impactMarkerPosition}>
+          {/* Orient the group so +Z points along surface normal */}
+          <primitive object={new THREE.AxesHelper(0)} visible={false} />
+          <group quaternion={impactOrientation}>
+            {/* Crater: shallow disc that appears at impact and persists */}
+            <mesh position={[0, 0, -0.02]}>
+              <cylinderGeometry args={[0.0, 0.22, 0.06, 24]} />
+              <meshStandardMaterial color="#6b3e2e" roughness={1} metalness={0} />
+            </mesh>
+
+            {/* Shockwave ring: expands quickly */}
+            {(animationPhase === 'impact' || animationPhase === 'explosion') && (
+              <mesh>
+                <ringGeometry args={[0.25 + impactProgress * 0.8, 0.27 + impactProgress * 0.85, 64]} />
+                <meshBasicMaterial color="#ffaa00" transparent opacity={0.6 - impactProgress * 0.5} side={THREE.DoubleSide} />
+              </mesh>
+            )}
+
+            {/* Tsunami ring: slower, larger, bluish */}
+            {(animationPhase === 'explosion' || animationPhase === 'aftermath') && (
+              <mesh>
+                <ringGeometry args={[0.3 + impactProgress * 1.2, 0.34 + impactProgress * 1.22, 96]} />
+                <meshBasicMaterial color="#1e90ff" transparent opacity={0.35 - Math.max(0, (impactProgress - 0.3)) * 0.3} side={THREE.DoubleSide} />
+              </mesh>
+            )}
+          </group>
+        </group>
       )}
     </group>
   );
@@ -268,10 +301,28 @@ const SimpleParticleEffects = ({
 /**
  * Animation Controller Hook
  */
-const useEnhancedAnimation = (animate, onComplete) => {
+const useEnhancedAnimation = (animate, onComplete, impactLocation) => {
   const [phase, setPhase] = useState('idle');
   const [progress, setProgress] = useState(0);
   const [asteroidPosition, setAsteroidPosition] = useState([0, 0, 8]);
+
+  // Compute target point on Earth surface from impactLocation
+  const targetPoint = useMemo(() => {
+    if (!impactLocation) return new THREE.Vector3(0, 0, 2);
+    const lat = (impactLocation.lat * Math.PI) / 180;
+    const lng = (impactLocation.lng * Math.PI) / 180;
+    const radius = 2.05;
+    const x = radius * Math.cos(lat) * Math.cos(lng);
+    const y = radius * Math.sin(lat);
+    const z = radius * Math.cos(lat) * Math.sin(lng);
+    return new THREE.Vector3(x, y, z);
+  }, [impactLocation]);
+
+  // Define start point far away in the direction of target normal
+  const startPoint = useMemo(() => {
+    const dir = targetPoint.clone().normalize();
+    return dir.multiplyScalar(8); // far start
+  }, [targetPoint]);
 
   useEffect(() => {
     if (!animate) {
@@ -283,7 +334,7 @@ const useEnhancedAnimation = (animate, onComplete) => {
 
     let animationId;
     let startTime = Date.now();
-    const duration = 8000; // 8 seconds total
+    const duration = 9000; // 9 seconds total
 
     const animateStep = () => {
       const elapsed = Date.now() - startTime;
@@ -292,23 +343,22 @@ const useEnhancedAnimation = (animate, onComplete) => {
       setProgress(newProgress);
 
       // Update phases and positions based on progress
-      if (newProgress < 0.4) {
+      if (newProgress < 0.45) {
         setPhase('approaching');
-        const t = newProgress / 0.4;
-        setAsteroidPosition([
-          0,
-          0,
-          8 - (6 * t * t) // Accelerating approach
-        ]);
-      } else if (newProgress < 0.5) {
+        const t = newProgress / 0.45;
+        // Ease-in approach along straight line toward target point
+        const ease = t * t;
+        const pos = new THREE.Vector3().lerpVectors(startPoint, targetPoint, ease);
+        setAsteroidPosition([pos.x, pos.y, pos.z + 0]);
+      } else if (newProgress < 0.55) {
         setPhase('impact');
-        setAsteroidPosition([0, 0, 2]);
-      } else if (newProgress < 0.8) {
+        setAsteroidPosition([targetPoint.x, targetPoint.y, targetPoint.z]);
+      } else if (newProgress < 0.85) {
         setPhase('explosion');
-        setAsteroidPosition([0, 0, 2]);
+        setAsteroidPosition([targetPoint.x, targetPoint.y, targetPoint.z]);
       } else if (newProgress < 1) {
         setPhase('aftermath');
-        setAsteroidPosition([0, 0, 2]);
+        setAsteroidPosition([targetPoint.x, targetPoint.y, targetPoint.z]);
       } else {
         setPhase('complete');
         if (onComplete) onComplete();
@@ -346,7 +396,7 @@ const EnhancedImpactScene = ({
     animate = false 
   } = simulationData || {};
 
-  const { phase, progress, asteroidPosition } = useEnhancedAnimation(animate, onAnimationComplete);
+  const { phase, progress, asteroidPosition } = useEnhancedAnimation(animate, onAnimationComplete, impactLocation);
 
   // Camera controls
   const { camera } = useThree();
@@ -394,6 +444,7 @@ const EnhancedImpactScene = ({
         impactLocation={impactLocation}
         showImpact={phase !== 'idle' && phase !== 'approaching'}
         animationPhase={phase}
+        impactProgress={progress}
       />
 
       {/* Enhanced Asteroid */}
@@ -437,9 +488,17 @@ const EnhancedImpactScene = ({
           )}
           {impactLocation && (
             <div>
-              Location: <span style={{ color: '#4A90E2' }}>
-                {impactLocation.lat.toFixed(2)}°, {impactLocation.lng.toFixed(2)}°
-              </span>
+              {(() => {
+                const lat = Number(impactLocation.lat);
+                const lng = Number(impactLocation.lng);
+                const latStr = Number.isFinite(lat) ? lat.toFixed(2) : 'N/A';
+                const lngStr = Number.isFinite(lng) ? lng.toFixed(2) : 'N/A';
+                return (
+                  <>
+                    Location: <span style={{ color: '#4A90E2' }}>{latStr}°, {lngStr}°</span>
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>

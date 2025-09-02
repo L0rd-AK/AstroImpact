@@ -53,6 +53,14 @@ const Navigation = () => {
               </Nav.Link>
             </LinkContainer>
             
+            <LinkContainer to="/orbits">
+              <Nav.Link>
+                <i className="bi bi-globe me-1"></i>
+                Orbits
+                <Badge bg="info" className="ms-1">3D</Badge>
+              </Nav.Link>
+            </LinkContainer>
+
             <LinkContainer to="/3d-test">
               <Nav.Link>
                 <i className="bi bi-cpu me-1"></i>

@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import AsteroidExplorer from './pages/AsteroidExplorer';
 import SimulationResults from './pages/SimulationResults';
 import Enhanced3DTest from './pages/Enhanced3DTest';
+import OrbitViewer from './pages/OrbitViewer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import { useAuth } from './context/AuthContext';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/simulation/:id" element={<SimulationResults />} />
           {/* Temporarily disabled 3D routes */}
           <Route path="/3d-test" element={<Enhanced3DTest />} />
+          <Route path="/orbits" element={<OrbitViewer />} />
           
           {/* Protected Routes */}
           <Route 

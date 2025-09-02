@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sphere, Html } from '@react-three/drei';
+import { OrbitControls, Sphere, Html, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Earth component with realistic textures
@@ -29,15 +29,31 @@ const Earth = ({ impactLocation, showImpact }) => {
     }
   });
 
+  const [earthColorMap, earthNormalMap, earthClouds] = useTexture([
+    'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg',
+    'https://threejs.org/examples/textures/planets/earth_clouds_1024.png'
+  ]);
+
   return (
     <group>
       {/* Earth */}
       <Sphere ref={earthRef} args={[2, 64, 64]}>
         <meshStandardMaterial
-          map={null} // We'll add texture loading later
-          color="#4A90E2"
-          roughness={0.7}
-          metalness={0.1}
+          map={earthColorMap}
+          normalMap={earthNormalMap}
+          roughness={0.85}
+          metalness={0.0}
+        />
+      </Sphere>
+
+      {/* Clouds */}
+      <Sphere args={[2.03, 64, 64]}>
+        <meshPhongMaterial
+          map={earthClouds}
+          transparent
+          opacity={0.4}
+          depthWrite={false}
         />
       </Sphere>
       

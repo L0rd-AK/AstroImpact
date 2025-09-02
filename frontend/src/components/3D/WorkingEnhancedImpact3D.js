@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Html, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, Html, PerspectiveCamera, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
 /**
@@ -15,17 +15,25 @@ const EnhancedEarth = React.memo(({
   const earthRef = useRef();
   const atmosphereRef = useRef();
   const impactMarkerRef = useRef();
+  const cloudsRef = useRef();
 
-  // Create Earth material with basic PBR properties
+  // Load textures
+  const [earthColorMap, earthNormalMap, earthClouds] = useTexture([
+    'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg',
+    'https://threejs.org/examples/textures/planets/earth_clouds_1024.png'
+  ]);
+
+  // Create Earth material with textures
   const earthMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: '#4A90E2',
-      roughness: 0.7,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 0.9
+    const mat = new THREE.MeshStandardMaterial({
+      map: earthColorMap,
+      normalMap: earthNormalMap,
+      roughness: 0.85,
+      metalness: 0.0
     });
-  }, []);
+    return mat;
+  }, [earthColorMap, earthNormalMap]);
 
   // Create atmosphere effect
   const atmosphereMaterial = useMemo(() => {
@@ -62,6 +70,10 @@ const EnhancedEarth = React.memo(({
     if (atmosphereRef.current) {
       atmosphereRef.current.rotation.y += 0.003;
     }
+    // Rotate cloud layer slightly faster
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += 0.006;
+    }
 
     // Pulse effect for impact marker during impact phases
     if (impactMarkerRef.current && (animationPhase === 'impact' || animationPhase === 'explosion')) {
@@ -77,6 +89,17 @@ const EnhancedEarth = React.memo(({
         <sphereGeometry args={[2, 64, 32]} />
       </mesh>
       
+      {/* Cloud layer */}
+      <mesh ref={cloudsRef}>
+        <sphereGeometry args={[2.03, 64, 32]} />
+        <meshPhongMaterial
+          map={earthClouds}
+          transparent
+          opacity={0.4}
+          depthWrite={false}
+        />
+      </mesh>
+
       {/* Atmosphere */}
       <mesh ref={atmosphereRef} material={atmosphereMaterial}>
         <sphereGeometry args={[2.1, 32, 16]} />
